@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Digital Electronics{% endblock %}</title>
+
+  <!-- ✅ Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 3D Animated Background Style -->
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      overflow: hidden;
+      background: radial-gradient(circle at top left, #0f172a, #1e293b);
+      color: white;
+    }
+
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .animated-bg span {
+      position: absolute;
+      color: rgba(255, 255, 255, 0.15);
+      font-size: 1.5rem;
+      animation: float 12s linear infinite;
+      user-select: none;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+      50% { opacity: 1; }
+      100% {
+        transform: translateY(-10vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body class="flex justify-center items-center min-h-screen text-white relative">
+
+  <!-- Background Animation -->
+  <div class="animated-bg" id="animated-bg"></div>
+
+  {% block content %}{% endblock %}
+
+  <!-- Floating symbols -->
+  <script>
+    const bg = document.getElementById('animated-bg');
+    const chars = ['&', '!', '0', '1', '&&', '#', '%', '?'];
+    for (let i = 0; i < 60; i++) {
+      const span = document.createElement('span');
+      span.textContent = chars[Math.floor(Math.random() * chars.length)];
+      span.style.left = Math.random() * 100 + 'vw';
+      span.style.animationDuration = (6 + Math.random() * 6) + 's';
+      span.style.fontSize = (14 + Math.random() * 22) + 'px';
+      bg.appendChild(span);
+    }
+  </script>
+
+</body>
+</html>

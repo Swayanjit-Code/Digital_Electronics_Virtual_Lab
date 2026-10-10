@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Virtual Digital Electronics Lab</title>
+
+  <style>
+    /* CSS Reset and Base Styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      /* Light theme variables */
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --bg-card: #ffffff;
+      --text-primary: #1a1a1a;
+      --text-secondary: #666666;
+      --accent-primary: #4285f4;
+      --accent-secondary: #34a853;
+      --border-color: #e0e0e0;
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+
+      /* Parallax defaults */
+      --parallax-x: 0px;
+      --parallax-y: 0px;
+    }
+
+    [data-theme="dark"] {
+      /* Dark theme variables */
+      --bg-primary: #121212;
+      --bg-secondary: #1e1e1e;
+      --bg-card: #2d2d2d;
+      --text-primary: #ffffff;
+      --text-secondary: #b3b3b3;
+      --accent-primary: #4285f4;
+      --accent-secondary: #34a853;
+      --border-color: #404040;
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      transition: background 0.3s ease, color 0.3s ease;
+      overflow-x: hidden;
+    }
+
+    /* === Professional Animated Background === */
+    .gradient-bg {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(-45deg, #1a1a1a, #0d2b45, #1e5128, #0f2027);
+      background-size: 400% 400%;
+      animation: gradientShift 20s ease infinite;
+      overflow: hidden;
+      z-index: -3;
+      will-change: background-position, transform;
+      transform: translate(calc(var(--parallax-x) * 0.02), calc(var(--parallax-y) * 0.02));
+    }
+
+    /* Floating glowing particles */
+    .gradient-bg::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(66,133,244,0.28) 2px, transparent 3px),
+        radial-gradient(circle, rgba(52,168,83,0.24) 2px, transparent 3px),
+        radial-gradient(circle, rgba(255,255,255,0.18) 1px, transparent 2px);
+      background-size: 220px 220px, 320px 320px, 160px 160px;
+      animation: floatParticles 40s linear infinite;
+      z-index: -2;
+      will-change: transform;
+    }
+
+    /* Subtle moving grid lines */
+    .gradient-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(transparent 95%, rgba(255,255,255,0.06) 5%),
+        linear-gradient(90deg, transparent 95%, rgba(255,255,255,0.06) 5%);
+      background-size: 60px 60px;
+      animation: gridMove 15s linear infinite;
+      opacity: 0.18;
+      z-index: -1;
+      will-change: background-position;
+    }
+
+    /* Optional extra parallax layer for “moveable” feel */
+    .parallax-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      opacity: 0.25;
+      mix-blend-mode: screen;
+      transition: transform 0.12s linear;
+      transform: translate(calc(var(--parallax-x) * -0.01), calc(var(--parallax-y) * -0.01));
+      background:
+        radial-gradient(800px 800px at 10% 20%, rgba(66,133,244,0.12), transparent 60%),
+        radial-gradient(600px 600px at 80% 30%, rgba(52,168,83,0.10), transparent 60%),
+        radial-gradient(700px 700px at 50% 80%, rgba(255,255,255,0.07), transparent 60%);
+    }
+
+    /* Keyframes */
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes floatParticles {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-220px); }
+    }
+
+    @keyframes gridMove {
+      from { background-position: 0 0; }
+      to   { background-position: 60px 60px; }
+    }
+
+    /* Header and Navigation */
+    header {
+      position: fixed;
+      inset: 0 0 auto 0;
+      background: var(--bg-primary);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 1000;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent-primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    /* Theme toggle button */
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 50px;
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-primary);
+    }
+    .theme-toggle:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+    .theme-icon { width: 20px; height: 20px; transition: transform 0.3s ease; }
+
+    /* Main content container */
+    main { margin-top: 80px; }
+
+    /* Hero Section */
+    .hero {
+      min-height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      background: transparent;
+      position: relative;
+    }
+
+    .hero-content { max-width: 800px; animation: fadeInUp 1s ease-out; }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      margin-bottom: 2.5rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary { background: var(--accent-primary); color: white; }
+    .btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+
+    .btn:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+    .btn-primary:hover { background: #3367d6; }
+    .btn-secondary:hover { background: var(--bg-secondary); }
+
+    /* Features Section */
+    .features { padding: 6rem 2rem; background: var(--bg-secondary); }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    .section-title { text-align: center; margin-bottom: 3rem; }
+    .section-title h2 { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; }
+    .section-title p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid var(--border-color);
+      opacity: 0; transform: translateY(16px);
+    }
+    .feature-card.is-visible { opacity: 1; transform: translateY(0); }
+
+    .feature-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .feature-card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+    .feature-card p { color: var(--text-secondary); line-height: 1.6; }
+
+    /* Simulation features grid */
+    .simulation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .sim-card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid var(--border-color);
+      text-align: center;
+      opacity: 0; transform: translateY(12px);
+    }
+    .sim-card.is-visible { opacity: 1; transform: translateY(0); }
+
+    .sim-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
+
+    .sim-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--accent-primary);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem auto;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .sim-card h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+
+    /* Footer */
+    footer {
+      background: var(--bg-primary);
+      border-top: 1px solid var(--border-color);
+      padding: 3rem 2rem 1rem 2rem;
+      text-align: center;
+    }
+
+    .footer-content { max-width: 1200px; margin: 0 auto; }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .footer-links a:hover { color: var(--accent-primary); }
+
+    .footer-bottom {
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      nav { padding: 1rem; }
+      .hero { padding: 2rem 1rem; min-height: 80vh; }
+      .hero h1 { font-size: 2.5rem; }
+      .hero p { font-size: 1.1rem; }
+      .cta-buttons { flex-direction: column; align-items: center; }
+      .btn { width: 100%; max-width: 300px; }
+      .features { padding: 4rem 1rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      .simulation-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+      .footer-links { flex-direction: column; gap: 1rem; }
+    }
+
+    /* Smooth scrolling */
+    html { scroll-behavior: smooth; }
+
+    /* Focus states for accessibility */
+    .btn:focus,
+    .theme-toggle:focus {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Animated gradient background -->
+  <div class="gradient-bg" aria-hidden="true"></div>
+  <div class="parallax-overlay" aria-hidden="true"></div>
+
+  <!-- Header with navigation -->
+  <header id="siteHeader">
+    <nav>
+      <a href="#" class="logo">
+        <div class="logo-icon">VL</div>
+        Virtual Lab
+      </a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+        <span class="sr-only" aria-hidden="true">Toggle Theme</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main content -->
+  <main>
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="hero-content">
+        <h1>Virtual Digital Electronics Lab</h1>
+        <p>Simulate digital circuits, track experiments, and collaborate with peers in our comprehensive virtual laboratory environment</p>
+        <div class="cta-buttons">
+          <a href="{{ url_for('login') }}" class="btn btn-primary">
+            <span>🔐</span> Login
+          </a>
+          <a href="{{ url_for('register') }}" class="btn btn-secondary">
+            <span>✨</span> Get Started
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+      <div class="container">
+        <div class="section-title">
+          <h2>Everything You Need for Digital Electronics</h2>
+          <p>Comprehensive tools and simulations designed for modern engineering education</p>
+        </div>
+
+        <!-- Main Features -->
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Circuit Simulations</h3>
+            <p>Interactive digital circuit simulations with real-time feedback and comprehensive component libraries for hands-on learning.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">👥</div>
+            <h3>Team Collaboration</h3>
+            <p>Work together on projects, share circuits, and collaborate in real-time with classmates and instructors.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Detailed Reports</h3>
+            <p>Generate comprehensive lab reports with automated data collection, analysis, and professional formatting.</p>
+          </div>
+        </div>
+
+        <!-- Simulation Components -->
+        <div class="section-title">
+          <h3>Available Simulations</h3>
+        </div>
+
+        <div class="simulation-grid">
+          <div class="sim-card">
+            <div class="sim-icon">∧</div>
+            <h4>Logic Gates</h4>
+          </div>
+
+          <div class="sim-card">
+            <div class="sim-icon">+</div>
+            <h4>Adders</h4>
+          </div>
+
+          <div class="sim-card">
+            <div class="sim-icon">-</div>
+            <h4>Subtractors</h4>
+          </div>
+
+          <div class="sim-card">
+            <div class="sim-icon">⚡</div>
+            <h4>Decoders</h4>
+          </div>
+
+          <div class="sim-card">
+            <div class="sim-icon">⚙</div>
+            <h4>Multiplexers</h4>
+          </div>
+
+          <div class="sim-card">
+            <div class="sim-icon">🔄</div>
+            <h4>Flip-Flops</h4>
+          </div>
+
+          <div class="sim-card">
+            <div class="sim-icon">📊</div>
+            <h4>Counters</h4>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer id="footer">
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="#home">About</a>
+        <a href="#features">Documentation</a>
+        <a href="#features">Support</a>
+        <a href="#footer">Contact</a>
+        <a href="#footer">Privacy Policy</a>
+        <a href="#footer">Terms of Service</a>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Virtual Digital Electronics Lab. Built for modern engineering education.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Elements
+    const body = document.body;
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const header = document.getElementById('siteHeader');
+
+    // === Theme handling ===
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+      body.setAttribute('data-theme', 'dark');
+      themeIcon.textContent = '☀';
+    } else {
+      body.removeAttribute('data-theme');
+      themeIcon.textContent = '🌙';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = body.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        body.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+        themeIcon.textContent = '🌙';
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        themeIcon.textContent = '☀';
+      }
+      // Repaint header background after theme change
+      applyHeaderScrollStyle();
+    });
+
+    // === Smooth scroll for on-page anchors ===
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        const targetSel = anchor.getAttribute('href');
+        if (!targetSel || targetSel === '#') return;
+        const target = document.querySelector(targetSel);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // === Header scroll shadow/background ===
+    function applyHeaderScrollStyle() {
+      const scrolled = window.scrollY > 100;
+      if (scrolled) {
+        header.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+        header.style.background =
+          body.getAttribute('data-theme') === 'dark'
+            ? 'rgba(18,18,18,0.92)'
+            : 'rgba(255,255,255,0.92)';
+      } else {
+        header.style.boxShadow = 'none';
+        header.style.background = 'var(--bg-primary)';
+      }
+    }
+    window.addEventListener('scroll', applyHeaderScrollStyle);
+    applyHeaderScrollStyle();
+
+    // === Reveal-on-scroll for cards ===
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.feature-card, .sim-card').forEach(el => obs.observe(el));
+
+    // === Moveable background (mouse parallax) ===
+    const root = document.documentElement;
+    window.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 100;  // -50 to 50
+      const y = (e.clientY / window.innerHeight - 0.5) * 100; // -50 to 50
+      root.style.setProperty('--parallax-x', x + 'px');
+      root.style.setProperty('--parallax-y', y + 'px');
+    });
+
+    // Reduce parallax intensity on scroll for performance
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          // could adapt intensity based on scroll if desired
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+  </script>
+</body>
+</html>

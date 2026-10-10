@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+
+<div class="relative z-10 flex justify-center items-center min-h-screen -mt-10">
+  <div class="bg-gray-900/90 shadow-2xl rounded-2xl p-10 w-full max-w-lg border border-gray-800 backdrop-blur-lg transform transition hover:scale-[1.02] hover:shadow-[0_0_30px_#22c55e80]">
+    <h2 class="text-3xl font-extrabold text-center text-green-400 mb-8">Create Account</h2>
+
+    {% if error %}
+      <p class="text-red-400 text-center bg-red-900/40 border border-red-600 py-2 rounded-lg mb-4">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('register') }}" class="space-y-5">
+      <!-- Full Name -->
+      <div>
+        <label class="block mb-1 text-gray-300 font-medium">Full Name</label>
+        <input type="text" name="name" required placeholder="John Doe"
+          class="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:outline-none transition" />
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label class="block mb-1 text-gray-300 font-medium">Email</label>
+        <input type="email" name="email" required placeholder="you@example.com"
+          class="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:outline-none transition" />
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label class="block mb-1 text-gray-300 font-medium">Password</label>
+        <input type="password" name="password" required placeholder="••••••••"
+          class="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:outline-none transition" />
+      </div>
+
+      <!-- Confirm Password -->
+      <div>
+        <label class="block mb-1 text-gray-300 font-medium">Confirm Password</label>
+        <input type="password" name="confirm_password" required placeholder="••••••••"
+          class="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:outline-none transition" />
+      </div>
+
+      <!-- Role -->
+      <div>
+        <label class="block mb-1 text-gray-300 font-medium">Role</label>
+        <select id="roleSelect" name="role"
+          class="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-green-500 focus:outline-none transition" required>
+          <option value="" disabled selected>Select Role</option>
+          <option value="student" class="text-black">Student</option>
+          <option value="teacher" class="text-black">Teacher</option>
+          <option value="admin" class="text-black">Admin</option>
+        </select>
+      </div>
+
+      <!-- Admin PIN (appears only if role=admin) -->
+      <div id="adminPinField" style="display:none;">
+        <label class="block mb-1 text-gray-300 font-medium">Admin PIN</label>
+        <input type="password" name="admin_pin" placeholder="Enter Admin PIN"
+          class="w-full px-4 py-2 border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500 focus:outline-none transition" />
+      </div>
+
+      <!-- Submit -->
+      <button type="submit"
+        class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition transform hover:scale-[1.03] shadow-lg shadow-green-800/40">
+        Register
+      </button>
+    </form>
+
+    <p class="text-center mt-6 text-sm text-gray-400">
+      Already have an account?
+      <a href="{{ url_for('login') }}" class="text-green-400 font-medium hover:underline">Sign in</a>
+    </p>
+  </div>
+</div>
+
+<!-- JS for showing Admin PIN field -->
+<script>
+document.getElementById("roleSelect").addEventListener("change", function() {
+  const adminPin = document.getElementById("adminPinField");
+  adminPin.style.display = this.value === "admin" ? "block" : "none";
+});
+</script>
+
+{% endblock %}

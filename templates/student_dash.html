@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Dashboard - Digital Lab</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f4f6f9;
+      transition: background .3s, color .3s;
+    }
+
+    .sidebar {
+      height: 100vh;
+      background: #003366;
+      color: white;
+      position: fixed;
+      width: 220px;
+      top: 0;
+      left: 0;
+      padding-top: 20px;
+      overflow-y: auto;
+    }
+
+    .sidebar h4 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .sidebar a {
+      color: white;
+      display: block;
+      padding: 12px 20px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .sidebar a:hover {
+      background: #00509e;
+    }
+
+    .content {
+      margin-left: 230px;
+      padding: 30px;
+    }
+
+    .experiment-list li {
+      background: white;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px #00000018;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .upload-box {
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 3px 6px #00000018;
+    }
+
+    .toggle-btn {
+      float: right;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      background: #00509e;
+      color: white;
+    }
+
+    .sim-card {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      padding: 16px;
+      height: 100%;
+    }
+
+    .sim-output {
+      font-size: 1.15rem;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .dark-mode {
+      background: #1e1e2f;
+      color: #e4e4e4;
+    }
+
+    .dark-mode .card,
+    .dark-mode .sim-card,
+    .dark-mode .experiment-list li,
+    .dark-mode .upload-box {
+      background: #2a2a3c;
+      color: #e4e4e4;
+      border-color: #444;
+    }
+
+    .dark-mode .form-select,
+    .dark-mode .form-control {
+      background-color: #343448;
+      color: white;
+      border-color: #555;
+    }
+
+    .dark-mode .text-muted {
+      color: #c0c0d0 !important;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+      }
+
+      .content {
+        margin-left: 0;
+        padding: 15px;
+      }
+
+      .experiment-list li {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h4>🔐 Digital Lab</h4>
+    <a href="#experiments">📘 Experiments</a>
+    <a href="#watch">🎥 Watch Videos</a>
+    <a href="#perform">⚗ Perform Simulation</a>
+    <a href="#submit">📤 Submit Report</a>
+    <a href="{{ url_for('logout') }}">🚪 Logout</a>
+  </div>
+
+  <!-- Main Content -->
+  <main class="content">
+
+    <button class="toggle-btn" onclick="toggleMode()">🌙 Dark Mode</button>
+
+    <h2 class="mb-4">
+      Welcome, {{ session['user'] if session['user'] else 'Student' }}
+    </h2>
+
+    {% if message %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close"
+                data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endif %}
+
+    <!-- Experiment List -->
+    <section id="experiments">
+      <h4>📘 Digital Electronics Experiments</h4>
+
+      <ul class="experiment-list list-unstyled">
+
+        <li>
+          <span>Verification of Basic Logic Gates (AND, OR, NOT, NAND, NOR, XOR, XNOR)</span>
+          <a href="#perform" data-circuit="AND"
+             class="experiment-select btn btn-primary btn-sm">Select</a>
+        </li>
+
+        <li>
+          <span>Verification of Half Adder and Half Subtractor</span>
+          <a href="#perform" data-circuit="HALF"
+             class="experiment-select btn btn-primary btn-sm">Select</a>
+        </li>
+
+        <li>
+          <span>Verification of Full Adder and Full Subtractor</span>
+          <a href="#perform" data-circuit="FULL"
+             class="experiment-select btn btn-primary btn-sm">Select</a>
+        </li>
+
+        <li>
+          <span>Implementation of Encoder and Decoder</span>
+          <a href="#perform" data-circuit="ENCODER"
+             class="experiment-select btn btn-primary btn-sm">Select</a>
+        </li>
+
+        <li>
+          <span>Implementation of Multiplexer and Demultiplexer</span>
+          <a href="#perform" data-circuit="MUX"
+             class="experiment-select btn btn-primary btn-sm">Select</a>
+        </li>
+
+        <li>
+          <span>Verification of Flip-Flops (SR, JK, D, T)</span>
+          <a href="#perform" data-circuit="UNAVAILABLE"
+             class="experiment-select btn btn-primary btn-sm">Select</a>
+        </li>
+
+        <li>
+          <span>Design of Counters (Asynchronous &amp; Synchronous)</span>
+          <a href="#perform" data-circuit="UNAVAILABLE"
+             class="experiment-select btn btn-primary btn-sm">Select</a>
+        </li>
+
+        <li>
+          <span>Design of Shift Registers</span>
+          <a href="#perform" data-circuit="UNAVAILABLE"
+             class="experiment-select btn btn-primary btn-sm">Select</a>
+        </li>
+
+      </ul>
+    </section>
+
+    <!-- Teacher Uploaded Videos and Files -->
+    <section id="watch" class="mt-5">
+      <h4>🎥 Teacher-Uploaded Tutorials and Experiment Files</h4>
+
+      {% if experiments %}
+        <div class="row g-3 mt-1">
+          {% for exp in experiments %}
+            {% set title = exp[0] %}
+            {% set filename = exp[1] %}
+            {% set ext = filename.rsplit('.', 1)[-1].lower() %}
+
+            <div class="col-12">
+              <div class="card p-3">
+                <h5>{{ title }}</h5>
+                <p class="text-muted mb-2">Uploaded: {{ exp[2] }}</p>
+
+                {% if ext in ['mp4', 'webm', 'ogg', 'mov'] %}
+                  <video controls preload="metadata"
+                         style="width:100%;max-width:760px;">
+                    <source src="{{ url_for('serve_experiments', filename=filename) }}">
+                    Your browser does not support this video format.
+                  </video>
+
+                {% elif ext == 'pdf' %}
+                  <a class="btn btn-outline-primary align-self-start"
+                     href="{{ url_for('serve_experiments', filename=filename) }}"
+                     target="_blank" rel="noopener">Open experiment PDF</a>
+
+                {% elif ext in ['png', 'jpg', 'jpeg'] %}
+                  <a href="{{ url_for('serve_experiments', filename=filename) }}"
+                     target="_blank" rel="noopener">Open experiment image</a>
+
+                {% else %}
+                  <p class="mb-0">This file type cannot be previewed in the browser.</p>
+                  <a href="{{ url_for('serve_experiments', filename=filename) }}"
+                     target="_blank" rel="noopener">Open/download file</a>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-info mt-3">
+          No experiments have been uploaded by a teacher yet.
+        </div>
+      {% endif %}
+    </section>
+
+    <!-- Interactive Simulator -->
+    <section id="perform" class="mt-5">
+      <div class="card p-4">
+
+        <h4>⚗ Interactive Digital Logic Simulator</h4>
+        <p class="text-muted">
+          Select a circuit, change its inputs, and observe the outputs.
+        </p>
+
+        <div id="simulationNotice" class="alert alert-warning d-none"
+             role="status"></div>
+
+        <div class="row g-3 align-items-end">
+
+          <div class="col-md-5">
+            <label for="circuitType" class="form-label">Circuit</label>
+            <select id="circuitType" class="form-select">
+              <optgroup label="Logic Gates">
+                <option value="AND">AND Gate</option>
+                <option value="OR">OR Gate</option>
+                <option value="NOT">NOT Gate (uses input A)</option>
+                <option value="NAND">NAND Gate</option>
+                <option value="NOR">NOR Gate</option>
+                <option value="XOR">XOR Gate</option>
+                <option value="XNOR">XNOR Gate</option>
+              </optgroup>
+
+              <optgroup label="Adders and Subtractors">
+                <option value="HALF">Half Adder</option>
+                <option value="FULL">Full Adder</option>
+                <option value="HALF_SUB">Half Subtractor</option>
+                <option value="FULL_SUB">Full Subtractor</option>
+              </optgroup>
+
+              <optgroup label="Combinational Circuits">
+                <option value="ENCODER">4-to-2 Encoder</option>
+                <option value="DECODER">2-to-4 Decoder</option>
+                <option value="MUX">4-to-1 Multiplexer</option>
+                <option value="DEMUX">1-to-4 Demultiplexer</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <div class="col-md-2" id="inputAWrap">
+            <label for="inputA" class="form-label" id="labelA">Input A</label>
+            <select id="inputA" class="form-select binary-input">
+              <option value="0">0 (OFF)</option>
+              <option value="1">1 (ON)</option>
+            </select>
+          </div>
+
+          <div class="col-md-2" id="inputBWrap">
+            <label for="inputB" class="form-label" id="labelB">Input B</label>
+            <select id="inputB" class="form-select binary-input">
+              <option value="0">0 (OFF)</option>
+              <option value="1">1 (ON)</option>
+            </select>
+          </div>
+
+          <div class="col-md-3" id="inputCWrap" style="display:none;">
+            <label for="inputC" class="form-label" id="labelC">Carry-in (Cin)</label>
+            <select id="inputC" class="form-select binary-input">
+              <option value="0">0 (OFF)</option>
+              <option value="1">1 (ON)</option>
+            </select>
+          </div>
+
+          <div class="col-md-3" id="inputDWrap" style="display:none;">
+            <label for="inputD" class="form-label">Input D</label>
+            <select id="inputD" class="form-select binary-input">
+              <option value="0">0 (OFF)</option>
+              <option value="1">1 (ON)</option>
+            </select>
+          </div>
+
+          <div class="col-md-3" id="select1Wrap" style="display:none;">
+            <label for="select1" class="form-label">Select S1</label>
+            <select id="select1" class="form-select binary-input">
+              <option value="0">0</option>
+              <option value="1">1</option>
+            </select>
+          </div>
+
+          <div class="col-md-3" id="select0Wrap" style="display:none;">
+            <label for="select0" class="form-label">Select S0</label>
+            <select id="select0" class="form-select binary-input">
+              <option value="0">0</option>
+              <option value="1">1</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Encoder Inputs -->
+        <div id="encoderInputs" class="row g-3 mt-2" style="display:none;">
+          <div class="col-12"><strong>Encoder inputs (only one should be ON)</strong></div>
+          {% for n in range(4) %}
+          <div class="col-md-3">
+            <label for="enc{{ n }}" class="form-label">D{{ n }}</label>
+            <select id="enc{{ n }}" class="form-select binary-input">
+              <option value="0">0 (OFF)</option>
+              <option value="1">1 (ON)</option>
+            </select>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Circuit Output -->
+        <div class="row g-3 mt-3">
+          <div class="col-md-6">
+            <div class="sim-card">
+              <h5>Output</h5>
+              <p class="mb-2">Result / Y / Sum / Difference:
+                <span id="outputY" class="sim-output">0</span>
+              </p>
+              <p class="mb-2" id="secondaryOutputRow">
+                Carry / Borrow:
+                <span id="outputCarry" class="sim-output">0</span>
+              </p>
+              <div id="multiOutput" class="mt-2"></div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="sim-card">
+              <h5>Logic Explanation</h5>
+              <p id="logicExplanation" class="mb-0">Y = A AND B</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="small text-muted mt-3 mb-0">
+          This browser-based simulator is for learning digital logic. It is not a
+          VHDL compiler or hardware-timing simulator.
+        </p>
+
+      </div>
+    </section>
+
+    <!-- Submit Experiment Report -->
+    <section id="submit" class="mt-5">
+      <h4>📤 Submit Your Experiment Report</h4>
+
+      <div class="upload-box mt-3">
+        <form action="{{ url_for('upload_submission') }}" method="POST"
+              enctype="multipart/form-data">
+          <div class="mb-3">
+            <label class="form-label">Upload PDF/Image of your output</label>
+            <input class="form-control" type="file" name="file"
+                   accept=".pdf,.png,.jpg,.jpeg" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Upload Report</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Uploaded Reports -->
+    {% if uploads %}
+      <h5 class="mt-4">📂 Your Uploaded Reports</h5>
+
+      <div class="table-responsive">
+        <table class="table table-bordered mt-3">
+          <thead class="table-dark">
+            <tr>
+              <th>Filename</th>
+              <th>Submitted On</th>
+              <th>Grade</th>
+              <th>Feedback</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for file in uploads %}
+              <tr>
+                <td>
+                  <a href="{{ url_for('serve_reports', filename=file[0]) }}"
+                     target="_blank">{{ file[0] }}</a>
+                </td>
+                <td>{{ file[1] }}</td>
+                <td>{{ file[2] if file[2] else '—' }}</td>
+                <td>{{ file[3] if file[3] else '—' }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted mt-4">No reports uploaded yet.</p>
+    {% endif %}
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    function toggleMode() {
+      document.body.classList.toggle("dark-mode");
+
+      const btn = document.querySelector(".toggle-btn");
+      btn.textContent = document.body.classList.contains("dark-mode")
+        ? "☀ Light Mode"
+        : "🌙 Dark Mode";
+    }
+
+    const $ = id => document.getElementById(id);
+
+    const circuitType = $("circuitType");
+
+    const inputA = $("inputA");
+    const inputB = $("inputB");
+    const inputC = $("inputC");
+    const inputD = $("inputD");
+    const select1 = $("select1");
+    const select0 = $("select0");
+
+    const binary = id => Number($(id).value);
+
+    function show(id, visible) {
+      $(id).style.display = visible ? "" : "none";
+    }
+
+    function updateSimulation() {
+      const type = circuitType.value;
+      const a = binary("inputA");
+      const b = binary("inputB");
+      const c = binary("inputC");
+      const d = binary("inputD");
+      const s1 = binary("select1");
+      const s0 = binary("select0");
+
+      let y = 0;
+      let carry = 0;
+      let explanation = "";
+      let extra = "";
+      let secondaryLabel = "Carry / Borrow";
+      let showSecondary = false;
+
+      const isFull = type === "FULL" || type === "FULL_SUB";
+      const isEncoder = type === "ENCODER";
+      const isDecoder = type === "DECODER";
+      const isMux = type === "MUX";
+      const isDemux = type === "DEMUX";
+
+      show("inputAWrap", !isEncoder);
+      show("inputBWrap", !isEncoder && !isMux && !isDemux);
+      show("inputCWrap", isFull);
+      show("inputDWrap", isMux);
+      show("select1Wrap", isMux || isDemux);
+      show("select0Wrap", isMux || isDemux);
+      show("encoderInputs", isEncoder);
+
+      $("labelA").textContent = isDemux ? "Data Input" : "Input A";
+      $("labelB").textContent = isDecoder ? "Input B" : "Input B";
+      $("labelC").textContent =
+        type === "FULL_SUB" ? "Borrow-in (Bin)" : "Carry-in (Cin)";
+
+      $("simulationNotice").classList.add("d-none");
+      $("multiOutput").innerHTML = "";
+
+      switch (type) {
+        case "AND":
+          y = a & b;
+          explanation = "Y = A AND B";
+          break;
+
+        case "OR":
+          y = a | b;
+          explanation = "Y = A OR B";
+          break;
+
+        case "NOT":
+          y = a ? 0 : 1;
+          explanation = "Y = NOT A";
+          break;
+
+        case "NAND":
+          y = (a & b) ? 0 : 1;
+          explanation = "Y = NOT (A AND B)";
+          break;
+
+        case "NOR":
+          y = (a | b) ? 0 : 1;
+          explanation = "Y = NOT (A OR B)";
+          break;
+
+        case "XOR":
+          y = a ^ b;
+          explanation = "Y = A XOR B";
+          break;
+
+        case "XNOR":
+          y = (a ^ b) ? 0 : 1;
+          explanation = "Y = NOT (A XOR B)";
+          break;
+
+        case "HALF":
+          y = a ^ b;
+          carry = a & b;
+          showSecondary = true;
+          secondaryLabel = "Carry-out";
+          explanation = "Sum = A XOR B; Carry = A AND B";
+          break;
+
+        case "FULL":
+          y = a ^ b ^ c;
+          carry = (a & b) | (a & c) | (b & c);
+          showSecondary = true;
+          secondaryLabel = "Carry-out";
+          explanation = "Sum = A XOR B XOR Cin; Carry = AB + ACin + BCin";
+          break;
+
+        case "HALF_SUB":
+          y = a ^ b;
+          carry = (a === 0 && b === 1) ? 1 : 0;
+          showSecondary = true;
+          secondaryLabel = "Borrow-out";
+          explanation = "Difference = A XOR B; Borrow = NOT A AND B";
+          break;
+
+        case "FULL_SUB":
+          y = a ^ b ^ c;
+          carry = ((!a && b) || (!(a ^ b) && c)) ? 1 : 0;
+          showSecondary = true;
+          secondaryLabel = "Borrow-out";
+          explanation = "Difference = A XOR B XOR Bin; Borrow = (NOT A AND B) OR (NOT(A XOR B) AND Bin)";
+          break;
+
+        case "ENCODER": {
+          const bits = [0, 1, 2, 3].map(n => binary("enc" + n));
+          const active = bits
+            .map((value, index) => value ? index : -1)
+            .filter(index => index !== -1);
+
+          if (active.length > 1) {
+            $("simulationNotice").textContent =
+              "A standard 4-to-2 encoder expects only one active input at a time.";
+            $("simulationNotice").classList.remove("d-none");
+          }
+
+          if (active.length === 0) {
+            y = 0;
+            extra = "<p>Encoded output: 00 (no active input)</p>";
+          } else {
+            const index = active[active.length - 1];
+            y = index >> 1;
+            carry = index & 1;
+            extra = `<p>Encoded bits: <strong>${y}${carry}</strong></p>`;
+          }
+
+          showSecondary = true;
+          secondaryLabel = "Output bit Y0";
+          explanation = "4-to-2 Encoder: one active input is encoded into a 2-bit binary value.";
+          break;
+        }
+
+        case "DECODER": {
+          const index = (a << 1) | b;
+          const outputs = [0, 1, 2, 3].map(i => i === index ? 1 : 0);
+
+          y = outputs[index];
+          extra = "<p><strong>Decoder outputs</strong></p>" +
+            outputs.map((v, i) => `<span class="badge ${v ? "text-bg-success" : "text-bg-secondary"} me-2 mb-2">Y${i} = ${v}</span>`).join("");
+
+          explanation = "2-to-4 Decoder: input AB activates exactly one output.";
+          break;
+        }
+
+        case "MUX": {
+          const inputs = [a, b, c, d];
+          const index = (s1 << 1) | s0;
+
+          y = inputs[index];
+
+          extra = `<p>Selected input: D${index}</p><p>Inputs D0-D3: ${inputs.join(", ")}</p>`;
+          explanation = "4-to-1 Multiplexer: Y = selected data input according to S1S0.";
+          break;
+        }
+
+        case "DEMUX": {
+          const index = (s1 << 1) | s0;
+          const outputs = [0, 1, 2, 3].map(i => i === index ? a : 0);
+
+          y = outputs[index];
+
+          extra = "<p><strong>Demultiplexer outputs</strong></p>" +
+            outputs.map((v, i) => `<span class="badge ${v ? "text-bg-success" : "text-bg-secondary"} me-2 mb-2">Y${i} = ${v}</span>`).join("");
+
+          explanation = "1-to-4 Demultiplexer: input A is routed to the output selected by S1S0.";
+          break;
+        }
+      }
+
+      $("outputY").textContent = y;
+      $("outputCarry").textContent = carry;
+      $("secondaryOutputRow").firstChild.textContent = secondaryLabel + ": ";
+      show("secondaryOutputRow", showSecondary);
+      $("logicExplanation").textContent = explanation;
+      $("multiOutput").innerHTML = extra;
+    }
+
+    [circuitType, inputA, inputB, inputC, inputD, select1, select0]
+      .forEach(el => el.addEventListener("change", updateSimulation));
+
+    document.querySelectorAll(".binary-input").forEach(el => {
+      el.addEventListener("change", updateSimulation);
+    });
+
+    document.querySelectorAll(".experiment-select").forEach(link => {
+      link.addEventListener("click", event => {
+        event.preventDefault();
+
+        const chosen = link.dataset.circuit || "AND";
+        $("perform").scrollIntoView({ behavior: "smooth" });
+
+        if (chosen === "UNAVAILABLE") {
+          $("simulationNotice").textContent =
+            "This experiment is listed in the dashboard, but its interactive simulator is not implemented yet. Currently supported: logic gates, adders, subtractors, encoder, decoder, multiplexer and demultiplexer.";
+          $("simulationNotice").classList.remove("d-none");
+          return;
+        }
+
+        circuitType.value = chosen;
+        updateSimulation();
+      });
+    });
+
+    updateSimulation();
+  </script>
+
+</body>
+</html>
